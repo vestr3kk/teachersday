@@ -30,7 +30,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 130px 20px 76px;
+  padding: 90px 20px 45px;
 }
 
 h1 {
@@ -51,10 +51,9 @@ h1 {
   text-shadow:
     0 2px 18px rgba(196, 155, 111, .22);
 
-  white-space: normal;
-  text-align: center;
-  line-height: 1.05;
+  white-space: nowrap;
 }
+
 .subtitle {
   position: absolute;
   top: 76px;
@@ -96,8 +95,9 @@ h1 {
 
 .wheel-area {
   position: relative;
-  width: min(68vh, 520px, 78vw);
+  width: min(52vh, 520px, 78vw);
   aspect-ratio: 1;
+  flex-shrink: 0;
 }
 
 #wheel {
@@ -373,9 +373,7 @@ h1 {
 <button id="musicToggle" class="music-control" type="button" aria-pressed="false" aria-label="Toggle background music">♫</button>
 
 <div class="app">
-
   <h1>Happy Teachers Day,<br>Ms Elim</h1>
-
   <p class="subtitle"></p>
   <p class="greeting"></p>
 
@@ -386,8 +384,8 @@ h1 {
   </div>
 
   <p class="footer-message"></p>
-
 </div>
+
 <div id="popup" class="popup">
   <div class="popup-card">
     <button id="closePopup" class="close">×</button>
