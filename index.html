@@ -434,6 +434,15 @@ let availableImages = [...imageFiles];
 let isSpinning = false;
 let currentRotation = 0;
 
+/* Preload all images so GitHub does not make the first spin wait for them. */
+const imageCache = new Map();
+imageFiles.forEach(file => {
+  const img = new Image();
+  img.decoding = "async";
+  img.src = file;
+  imageCache.set(file, img);
+});
+
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
 const size = canvas.width;
@@ -509,24 +518,41 @@ function spinWheel() {
   currentRotation += extraSpins * 360 + adjustment;
   canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-  window.setTimeout(() => {
+  window.setTimeout(async () => {
     const resultImage = document.getElementById("resultImage");
-    resultImage.onerror = () => {
-      resultImage.style.display = "none";
-      alert("Could not load the selected image: " + selectedImage);
-    };
-    resultImage.onload = () => {
+    const popup = document.getElementById("popup");
+    const cached = imageCache.get(selectedImage);
+
+    try {
+      // Wait for the selected image to actually be available.
+      if (cached && !cached.complete) {
+        await new Promise((resolve, reject) => {
+          cached.onload = resolve;
+          cached.onerror = reject;
+        });
+      }
+
+      if (!cached || cached.naturalWidth === 0) {
+        throw new Error("Image failed to load");
+      }
+
       resultImage.style.display = "block";
-    };
-    resultImage.alt = "Selected image";
-    resultImage.src = selectedImage;
+      resultImage.alt = "Selected image";
+      resultImage.src = selectedImage;
 
-    // Remove it only after it has been selected and the spin has finished.
-    availableImages.splice(selectedIndex, 1);
-    drawWheel();
+      // Remove exactly one selected image.
+      const removeIndex = availableImages.indexOf(selectedImage);
+      if (removeIndex !== -1) {
+        availableImages.splice(removeIndex, 1);
+      }
 
-    document.getElementById("popup").classList.add("show");
-    isSpinning = false;
+      drawWheel();
+      popup.classList.add("show");
+    } catch (error) {
+      alert("Could not load the selected image: " + selectedImage);
+    } finally {
+      isSpinning = false;
+    }
   }, 4100);
 }
 
